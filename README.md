@@ -21,11 +21,13 @@ data/
   processed/    Validated datasets for analysis
 docs/           Scope, source references, and dataset guides
 AGENTS.md       Repository working instructions
-requirements.txt
+pyproject.toml  Project metadata and dependencies
 ```
 
 Data files are excluded from Git; `.gitkeep` files preserve the directories. After cloning, follow [Getting the data](docs/DATA_SOURCES.md#getting-the-data) to populate `data/raw/`. Keep raw files unchanged and generate derived data through code.
 
 ## Development status
 
-`requirements.txt` is a placeholder with no dependencies declared yet. Add dependencies and runnable setup, pipeline, and validation commands as implementation begins. Python environments, generated data, and model artifacts are excluded by `.gitignore`.
+[pyproject.toml](pyproject.toml) defines the project metadata, a Python 3.12+ baseline, and an empty dependency list. Add dependencies there as implementation begins. Package installation, build configuration, and development tools are not configured yet; introduce them alongside the code that needs them.
+
+Python environments, generated data, and model artifacts are excluded by `.gitignore`.

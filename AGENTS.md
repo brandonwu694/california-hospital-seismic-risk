@@ -23,6 +23,7 @@ Keep project scope and dataset explanations in these documents. Update the relev
 - Keep docstrings and inline comments concise. Document intent, assumptions, or non-obvious behavior rather than restating what the code already expresses.
 - Prefer simple solutions before introducing abstractions, frameworks, or additional dependencies.
 - Avoid adding dependencies unless they provide a clear benefit that cannot reasonably be achieved with the existing stack.
+- Maintain project metadata, the supported Python version, and dependencies in [pyproject.toml](pyproject.toml). Keep dependency declarations in one place and add build or tool configuration when implementation requires it.
 - Separate data ingestion, transformation, validation, feature engineering, modeling, and evaluation where practical.
 - Do not hard-code dataset-specific values, paths, thresholds, or mappings when they are likely to change; centralize reusable configuration instead.
 - Preserve existing behavior unless a change is intentional. Update or add tests when behavior changes.

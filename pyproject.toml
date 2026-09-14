@@ -1,0 +1,7 @@
+[project]
+name = "california-hospital-seismic-risk"
+version = "0.1.0"
+description = "California hospital building data integration and seismic risk analysis."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
