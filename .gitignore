@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+!.env.template
+.python-version
+
+# Caches and test results
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.ipynb_checkpoints/
+
+# ML artifacts
+/artifacts/
+/checkpoints/
+/outputs/
+/runs/
+/mlruns/
+/mlartifacts/
+/wandb/
+events.out.tfevents.*
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+
+# Logs and temporary files
+*.log
+/logs/
+/tmp/
+/temp/
+*.tmp
+
+# Editors and OS
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Data directory placeholders
+/data/**
+!/data/**/
+!/data/**/.gitkeep
