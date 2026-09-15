@@ -5,7 +5,9 @@
 - Read [PROJECT_SCOPE.md](docs/PROJECT_SCOPE.md) before changing analysis or implementation. It defines the objectives, conceptual model, unit of analysis, modeling population, and phase-specific deliverables and validation requirements.
 - Consult [DATA_SOURCES.md](docs/DATA_SOURCES.md) for dataset provenance, citations, source links, and instructions for adding datasets.
 - Read [SEISMIC_DATA.md](docs/SEISMIC_DATA.md) when working with seismic ratings, Hazus scores, or their interpretation.
+- Keep seismic EDA and its findings in [01_eda_seismic.ipynb](notebooks/01_eda_seismic.ipynb). Make it understandable on its own and save refreshed inline outputs; do not generate a separate Markdown EDA report.
 - Read [HOSPITAL_BUILDING_DATA.md](docs/HOSPITAL_BUILDING_DATA.md) when working with building characteristics or joining the HCAI datasets. It documents field definitions, missing values, identifier types, and header differences.
+- Keep building EDA and its findings in [02_eda_hospital_building.ipynb](notebooks/02_eda_hospital_building.ipynb), following the same notebook-only approach with refreshed inline outputs.
 
 Keep project scope and dataset explanations in these documents. Update the relevant document when decisions change rather than duplicating its contents here.
 

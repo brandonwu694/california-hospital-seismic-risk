@@ -83,6 +83,8 @@ The following table reproduces all 18 entries from the publisher’s dictionary 
 
 ## Loading and analysis notes
 
+See the [building EDA notebook](../notebooks/02_eda_hospital_building.ipynb) for per-column missingness, physical characteristics, code/completion-year checks, identifier consistency, and cleanup decisions with saved inline results.
+
 - The main CSV decodes using Windows-1252 (`cp1252`).
 - Preserve IDs and SPC ratings as text. `N/A` means not applicable, and `NYA` means not yet available according to the dictionary; do not treat category labels as numeric ratings.
 - The package schema declares `Perm ID`, height, stories, code year, completion year, latitude, longitude, and count as numeric. Other columns are strings. Treat `Perm ID` as an identifier when loading, and parse measurement fields explicitly while preserving missing values.

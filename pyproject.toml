@@ -5,3 +5,9 @@ description = "California hospital building data integration and seismic risk an
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[dependency-groups]
+notebook = [
+    "ipykernel>=6,<8",
+    "jupyterlab>=4,<5",
+]
