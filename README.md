@@ -2,7 +2,7 @@
 
 A project to integrate California hospital building characteristics and seismic assessments, with earthquake scenario modeling planned for later work.
 
-The repository currently contains project documentation and reproducible EDA notebooks for the seismic and building datasets. The first planned phase is a validated dataset with one record per hospital building. The integration pipeline, trained models, and an automated test suite have not been implemented yet.
+The repository contains project documentation, reproducible EDA notebooks, and a validated Phase 1 cleaning and integration pipeline. Modeling-population selection, trained models, and earthquake-scenario analysis remain future work.
 
 ## Start here
 
@@ -12,6 +12,7 @@ The repository currently contains project documentation and reproducible EDA not
 - [Seismic EDA notebook](notebooks/01_eda_seismic.ipynb): data structure, column types, missingness, distributions, and cleanup decisions, with saved inline results.
 - [Hospital building data guide](docs/HOSPITAL_BUILDING_DATA.md): building characteristics and joining guidance.
 - [Building EDA notebook](notebooks/02_eda_hospital_building.ipynb): missingness, physical characteristics, code/completion years, and cleanup decisions, with saved inline results.
+- [Cleaning pipeline](docs/CLEANING_PIPELINE.md): canonical schema, validation behavior, integration audit, outputs, and test command.
 - [Repository guidance](AGENTS.md): conventions for contributing changes.
 
 ## Structure
@@ -19,10 +20,12 @@ The repository currently contains project documentation and reproducible EDA not
 ```text
 data/
   raw/          Original downloaded CSVs
-  interim/      Intermediate transformation outputs
-  processed/    Validated datasets for analysis
+  interim/      Independently cleaned source tables
+  processed/    Integrated, validated datasets for analysis
 docs/           Scope, source references, and dataset guides
 notebooks/      Exploratory analysis with inline results
+src/            Reusable cleaning and integration package
+tests/          Sanity, integration, and end-to-end tests
 AGENTS.md       Repository working instructions
 pyproject.toml  Project metadata and dependencies
 ```
@@ -31,6 +34,23 @@ Data files are excluded from Git; `.gitkeep` files preserve the directories. Aft
 
 ## Development status
 
-[pyproject.toml](pyproject.toml) defines the project metadata, a Python 3.12+ baseline, and the `notebook` dependency group for JupyterLab and the Python kernel. The analysis itself uses the standard library. Runtime dependencies remain empty; package installation and build configuration can be added when reusable pipeline code is introduced.
+[pyproject.toml](pyproject.toml) defines the project metadata, a Python 3.12+ baseline, PyArrow for typed Parquet datasets, and the `notebook` dependency group for JupyterLab and the Python kernel.
 
 Python environments, generated data, and model artifacts are excluded by `.gitignore`.
+
+## Build the integrated dataset
+
+Install the project in an active Python environment:
+
+```sh
+python3 -m pip install .
+```
+
+After placing both source CSVs in `data/raw/`, run:
+
+```sh
+build-integrated-data
+python3 -m unittest discover -s tests -v
+```
+
+The pipeline preserves all source records, writes independently cleaned Parquet tables to `data/interim/`, writes the integrated Parquet dataset and validation report to `data/processed/`, and stops when required invariants fail. See the [cleaning pipeline guide](docs/CLEANING_PIPELINE.md) for details.

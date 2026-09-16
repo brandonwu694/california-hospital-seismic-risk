@@ -189,6 +189,8 @@ Every filtering rule should have a documented reason.
 
 ## 6. Phase 1 — Build the Integrated Dataset
 
+Implementation details and current validation behavior are documented in the [cleaning and integration pipeline guide](CLEANING_PIPELINE.md).
+
 ### Objective
 
 Create a validated building-level dataset combining physical building information with seismic assessment information.

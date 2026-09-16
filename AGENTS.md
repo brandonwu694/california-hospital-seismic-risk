@@ -8,12 +8,13 @@
 - Keep seismic EDA and its findings in [01_eda_seismic.ipynb](notebooks/01_eda_seismic.ipynb). Make it understandable on its own and save refreshed inline outputs; do not generate a separate Markdown EDA report.
 - Read [HOSPITAL_BUILDING_DATA.md](docs/HOSPITAL_BUILDING_DATA.md) when working with building characteristics or joining the HCAI datasets. It documents field definitions, missing values, identifier types, and header differences.
 - Keep building EDA and its findings in [02_eda_hospital_building.ipynb](notebooks/02_eda_hospital_building.ipynb), following the same notebook-only approach with refreshed inline outputs.
+- Consult [CLEANING_PIPELINE.md](docs/CLEANING_PIPELINE.md) when changing the canonical schema, validation rules, integration behavior, outputs, or tests.
 
 Keep project scope and dataset explanations in these documents. Update the relevant document when decisions change rather than duplicating its contents here.
 
 ## Working with data
 
-- Preserve source files in `data/raw/`. Perform cleaning and transformations in code, and write derived datasets to `data/processed/`.
+- Preserve source files in `data/raw/`. Write independently cleaned source tables to `data/interim/` and integrated, analysis-ready datasets to `data/processed/`.
 - Follow the current phase's validation requirements in `PROJECT_SCOPE.md`; recheck join keys and coverage when inputs change.
 - Document filtering decisions and their effect on the modeling population in accordance with `PROJECT_SCOPE.md`.
 - Keep documentation links consistent with the actual file layout when files move.
