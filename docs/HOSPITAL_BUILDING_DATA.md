@@ -54,7 +54,7 @@ Use `Perm ID` and `Building Nbr` together as the join key. In the current snapsh
 
 The building dataset adds `Building URL`, `Height (ft)`, `Stories`, `Building Code`, `Building Code Year`, and `Year Completed`. The seismic dataset adds `HCAI NPC Rating`, `2007 Hazus Score (%)`, and `2010 Hazus Score (%)`.
 
-Normalize the building CSV’s `SPC Rating *` and the seismic CSV’s `SPC Rating ` (which has a trailing space) to the same analysis column name. Load `Perm ID` consistently as text in both datasets, even though the building dictionary declares it numeric. Keep the raw files unchanged and join during analysis. Validate key uniqueness, unmatched records, and agreement of shared fields before selecting which overlapping columns to retain. Avoid joining on facility name or coordinates, which can repeat across buildings.
+Normalize the building CSV’s `SPC Rating *` and the seismic CSV’s `SPC Rating ` (which has a trailing space) to the same analysis column name. Load `Perm ID` consistently as text in both datasets, even though the building dictionary declares it numeric. Keep the raw files unchanged and join through the validated [cleaning pipeline](CLEANING_PIPELINE.md). The pipeline checks key uniqueness, unmatched records, and agreement of shared fields before publishing the integrated table. Avoid joining on facility name or coordinates, which can repeat across buildings.
 
 ## Detailed data dictionary
 
@@ -83,7 +83,7 @@ The following table reproduces all 18 entries from the publisher’s dictionary 
 
 ## Loading and analysis notes
 
-See the [building EDA notebook](../notebooks/02_eda_hospital_building.ipynb) for per-column missingness, physical characteristics, code/completion-year checks, identifier consistency, and cleanup decisions with saved inline results.
+See the [building EDA notebook](../notebooks/02_eda_hospital_building.ipynb) for per-column missingness, physical characteristics, code/completion-year checks, identifier consistency, and cleanup findings that informed the current pipeline, with saved inline results.
 
 - The main CSV decodes using Windows-1252 (`cp1252`).
 - Preserve IDs and SPC ratings as text. `N/A` means not applicable, and `NYA` means not yet available according to the dictionary; do not treat category labels as numeric ratings.

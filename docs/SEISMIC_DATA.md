@@ -76,7 +76,7 @@ The following table reproduces all 15 entries from the publisher’s dictionary 
 
 ## Loading and analysis notes
 
-See the [EDA notebook](../notebooks/01_eda_seismic.ipynb) for per-column missingness, numeric and rating distributions, identifier checks, city inconsistencies, and proposed cleanup decisions. The notebook contains the analysis and its saved inline results.
+See the [EDA notebook](../notebooks/01_eda_seismic.ipynb) for per-column missingness, numeric and rating distributions, identifier checks, city inconsistencies, and cleanup findings that informed the current pipeline. The notebook contains the analysis and its saved inline results.
 
 - The main CSV decodes using Windows-1252 (`cp1252`).
 - The main CSV header contains a trailing space in `SPC Rating `. Strip header whitespace when loading, while preserving the source file.

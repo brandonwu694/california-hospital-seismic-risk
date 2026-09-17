@@ -195,6 +195,12 @@ Implementation details and current validation behavior are documented in the [cl
 
 Create a validated building-level dataset combining physical building information with seismic assessment information.
 
+### Current status
+
+The cleaning and integration pipeline now loads, normalizes, validates, and joins both HCAI snapshots. It preserves all 4,690 building-level rows from each source, writes independently cleaned source tables to `data/interim/`, and publishes the integrated Parquet dataset, validation report, and completion manifest to `data/processed/`.
+
+The modeling population, predictor eligibility, and target definition remain open decisions. The current integrated output is therefore a validated analysis dataset and the input to those decisions; it is not yet the final modeling table.
+
 ### Tasks
 
 1. Load both HCAI datasets.
@@ -223,9 +229,9 @@ Document:
 - records removed from the modeling population
 - missingness in important features
 
-### Expected Output
+### Current and planned outputs
 
-A modeling-ready dataset with approximately:
+The current integrated dataset includes canonical identifiers, building characteristics, seismic assessment fields, and review flags. Representative columns include:
 
 ```text
 facility_id
@@ -234,10 +240,13 @@ facility_name
 building_name
 year_completed
 stories
-height
+height_ft
 building_code
+spc_rating
+hazus_2007_pct
+hazus_2010_pct
+review_flags
 ...
-target
 ```
 
-This field list is illustrative. The final target definition and feature eligibility remain to be decided during implementation. Store the validated output in `data/processed/` and document the validation results listed above.
+The future modeling table will be derived from this output after the modeling population, target, and eligible predictors are documented. Seismic assessment fields must not be introduced as predictors without an explicit leakage review.

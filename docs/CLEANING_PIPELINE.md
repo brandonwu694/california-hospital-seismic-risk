@@ -1,12 +1,12 @@
 # Cleaning and integration pipeline
 
-The Phase 1 pipeline reads both HCAI source CSVs, cleans and validates each source independently, persists the typed source tables, joins building records, and writes an integrated dataset with an audit report. It does not filter the modeling population or choose a target.
+The Phase 1 pipeline reads both HCAI source CSVs, cleans and validates each source independently, persists the typed source tables, joins building records, and publishes an integrated dataset with validation and completion metadata. It does not filter the modeling population or choose a target.
 
 ## Modules
 
 | Module | Responsibility |
 | --- | --- |
-| `schema.py` | Source mappings, canonical columns, types, join keys, and snapshot constants. |
+| `schema.py` | Source mappings, canonical columns, types, join keys, and schema version. |
 | `ingestion.py` | Windows-1252 CSV loading with every source cell initially retained as text. |
 | `cleaning/columns.py` | Header normalization, including both source SPC headers mapping to `spc_rating`. |
 | `cleaning/values.py` | Nullable numeric parsing while retaining text markers such as `N/A`. |
@@ -52,9 +52,9 @@ The current snapshot produces 4,690 integrated records from a complete one-to-on
 
 ## Publication and reproducibility
 
-The pipeline writes all artifacts into a temporary staging directory and validates the persisted Parquet sources before publishing them. It replaces individual artifacts atomically and publishes the completion manifest last. The manifest is removed before replacements begin, so its presence identifies a complete set whose hashes can be checked against the current files.
+The pipeline writes all successful-run artifacts into a temporary staging directory and validates the persisted Parquet sources before publishing them. It replaces individual artifacts atomically and publishes the completion manifest last. The manifest is removed before replacements begin, so its presence identifies a complete set whose hashes can be checked against the current files.
 
-The validation report records the run ID, UTC timestamp, package and schema versions, a hash of the package source, Python and PyArrow versions, validation configuration, and SHA-256 fingerprints of both raw inputs. The completion manifest also fingerprints every published artifact using paths relative to `data/processed/`. Failed runs preserve the previous completed run when failure occurs before publication and write a uniquely named structured failure report, including complete join diagnostics when applicable.
+The validation report records the run ID, UTC timestamp, package and schema versions, a hash of the package source, Python and PyArrow versions, validation configuration, and SHA-256 fingerprints of both raw inputs. The completion manifest also fingerprints every published artifact using paths relative to `data/processed/`. Failed runs preserve the previous completed run when failure occurs before publication and write `data/processed/hospital_buildings_failure_<run_id>.json`, including complete join diagnostics when applicable.
 
 ## Tests
 

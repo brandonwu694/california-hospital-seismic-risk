@@ -18,16 +18,44 @@ The repository contains project documentation, reproducible EDA notebooks, and a
 ## Structure
 
 ```text
-data/
-  raw/          Original downloaded CSVs
-  interim/      Independently cleaned source tables
-  processed/    Integrated, validated datasets for analysis
-docs/           Scope, source references, and dataset guides
-notebooks/      Exploratory analysis with inline results
-src/            Reusable cleaning and integration package
-tests/          Sanity, integration, and end-to-end tests
-AGENTS.md       Repository working instructions
-pyproject.toml  Project metadata and dependencies
+.
+├── data/
+│   ├── raw/                       # Original downloaded CSVs
+│   ├── interim/                   # Independently cleaned source tables
+│   └── processed/                 # Integrated data, reports, and manifests
+├── docs/
+│   ├── CLEANING_PIPELINE.md
+│   ├── DATA_SOURCES.md
+│   ├── HOSPITAL_BUILDING_DATA.md
+│   ├── PROJECT_SCOPE.md
+│   └── SEISMIC_DATA.md
+├── notebooks/
+│   ├── 01_eda_seismic.ipynb
+│   └── 02_eda_hospital_building.ipynb
+├── src/
+│   └── california_seismic/
+│       ├── cleaning/
+│       │   ├── columns.py
+│       │   ├── quality.py
+│       │   └── values.py
+│       ├── artifacts.py
+│       ├── ingestion.py
+│       ├── integration.py
+│       ├── pipeline.py
+│       ├── schema.py
+│       ├── storage.py
+│       └── validation.py
+├── tests/
+│   ├── test_artifacts.py
+│   ├── test_cleaning.py
+│   ├── test_ingestion.py
+│   ├── test_integration.py
+│   ├── test_pipeline.py
+│   └── test_validation.py
+├── .gitignore
+├── AGENTS.md
+├── README.md
+└── pyproject.toml
 ```
 
 Data files are excluded from Git; `.gitkeep` files preserve the directories. After cloning, follow [Getting the data](docs/DATA_SOURCES.md#getting-the-data) to populate `data/raw/`. Keep raw files unchanged and generate derived data through code.

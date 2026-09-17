@@ -1,4 +1,4 @@
-# Documentation for Datasets Used In This Project
+# Data Sources
 
 This document records source links, attribution, license information, review details, and project files for each dataset. Dataset guides contain field definitions and interpretation notes.
 
@@ -14,6 +14,8 @@ Download each main CSV using the source links in its dataset section below, and 
 | Hospital building data | [Building source links](#building-source-links) | `data/raw/hospital-building-data-.csv` |
 
 The publisher's download names include a date; use the destination filenames above and preserve the file contents. Prefer the recorded downloads when reproducing the documented snapshot. If a download is unavailable or a newer release is used, record the replacement source and review date, then recheck the documented row counts, missingness, and join coverage. The complete dictionaries are already included in the dataset guides.
+
+After populating `data/raw/`, follow the [cleaning pipeline guide](CLEANING_PIPELINE.md) to build and validate the derived datasets.
 
 ## Adding a dataset
 
