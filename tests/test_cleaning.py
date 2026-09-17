@@ -28,7 +28,8 @@ class CleaningTests(unittest.TestCase):
                 "spc_rating": "N/A",
                 "height_ft": "",
                 "stories": "2",
-            }]
+            }],
+            "fixture",
         )[0]
 
         self.assertEqual(parsed["facility_id"], "00123")
@@ -54,6 +55,7 @@ class CleaningTests(unittest.TestCase):
             flagged["review_flags"],
             "zero_height;zero_stories;completion_before_code_year;spc_unverified;not_in_service",
         )
+        self.assertEqual(add_review_flags(flagged), flagged)
 
     def test_facility_city_inconsistency_flags_all_affected_rows(self) -> None:
         rows = [
@@ -69,6 +71,23 @@ class CleaningTests(unittest.TestCase):
             flagged[1]["review_flags"], "zero_height;facility_city_inconsistent"
         )
         self.assertEqual(flagged[2]["review_flags"], "")
+
+        flagged_again = add_dataset_review_flags(flagged)
+        self.assertEqual(flagged_again, flagged)
+
+    def test_numeric_parse_error_includes_source_record_and_key(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "fixture record 2.*facility_id='00123'.*building_id='BLD-00001'",
+        ):
+            parse_values(
+                [{
+                    "facility_id": "00123",
+                    "building_id": "BLD-00001",
+                    "height_ft": "not-a-number",
+                }],
+                "fixture",
+            )
 
 
 if __name__ == "__main__":

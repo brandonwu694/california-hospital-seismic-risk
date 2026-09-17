@@ -2,6 +2,7 @@
 
 import csv
 from pathlib import Path
+from typing import cast
 
 from .schema import ENCODING, SourceSchema
 
@@ -25,10 +26,19 @@ def read_source_csv(path: Path, schema: SourceSchema) -> list[dict[str, str]]:
         if len(stripped) != len(set(stripped)):
             raise IngestionError(f"{schema.name} source has duplicate normalized headers")
         reader.fieldnames = stripped
-        rows = list(reader)
+        rows: list[dict[str, str]] = []
+        for record_number, row in enumerate(reader, start=2):
+            if None in row:
+                raise IngestionError(
+                    f"{schema.name} record {record_number} contains more fields than its header"
+                )
+            missing = [column for column, value in row.items() if value is None]
+            if missing:
+                raise IngestionError(
+                    f"{schema.name} record {record_number} is missing fields: {missing}"
+                )
+            rows.append(cast(dict[str, str], row))
 
     if not rows:
         raise IngestionError(f"{schema.name} source has no records")
-    if any(None in row for row in rows):
-        raise IngestionError(f"{schema.name} source contains records wider than its header")
     return rows

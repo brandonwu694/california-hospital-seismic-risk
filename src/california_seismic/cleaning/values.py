@@ -1,19 +1,30 @@
 """Parse canonical values while retaining categorical missing markers."""
 
-from typing import TypeAlias
-
-from ..schema import FLOAT_COLUMNS, INTEGER_COLUMNS, TEXT_COLUMNS
-
-
-Scalar: TypeAlias = str | int | float | None
+from ..schema import FLOAT_COLUMNS, INTEGER_COLUMNS, TEXT_COLUMNS, Scalar
 
 
 class ValueParsingError(ValueError):
     """Raised when a nonblank numeric source value cannot be parsed."""
 
 
-def parse_values(rows: list[dict[str, str]]) -> list[dict[str, Scalar]]:
-    return [{column: _parse(column, value) for column, value in row.items()} for row in rows]
+def parse_values(
+    rows: list[dict[str, str]], source_name: str
+) -> list[dict[str, Scalar]]:
+    parsed: list[dict[str, Scalar]] = []
+    for record_number, row in enumerate(rows, start=2):
+        try:
+            parsed.append(
+                {column: _parse(column, value) for column, value in row.items()}
+            )
+        except ValueParsingError as exc:
+            key = (
+                f"facility_id={row.get('facility_id')!r}, "
+                f"building_id={row.get('building_id')!r}"
+            )
+            raise ValueParsingError(
+                f"{source_name} record {record_number} ({key}): {exc}"
+            ) from exc
+    return parsed
 
 
 def _parse(column: str, value: str) -> Scalar:

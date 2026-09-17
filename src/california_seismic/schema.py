@@ -2,11 +2,12 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TypeAlias
 
 
+Scalar: TypeAlias = str | int | float | None
 ENCODING = "cp1252"
 JOIN_KEYS = ("facility_id", "building_id")
-SNAPSHOT_YEAR = 2026
 
 SHARED_COLUMNS = (
     "county_code",

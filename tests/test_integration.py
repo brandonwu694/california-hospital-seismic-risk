@@ -44,6 +44,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(joined[0]["facility_id"], "00123")
         self.assertEqual(joined[0]["height_ft"], 50.0)
         self.assertEqual(joined[0]["npc_rating"], "4")
+        self.assertNotIn("review_flags", joined[0])
 
     def test_rejects_shared_field_disagreement(self) -> None:
         building = shared_row()

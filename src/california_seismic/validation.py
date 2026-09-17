@@ -4,9 +4,31 @@ import math
 import re
 from collections import Counter
 from collections.abc import Iterable, Mapping
+from dataclasses import dataclass
 
-from .cleaning.values import Scalar
-from .schema import JOIN_KEYS, SNAPSHOT_YEAR, SourceSchema
+from .schema import JOIN_KEYS, Scalar, SourceSchema
+
+
+@dataclass(frozen=True)
+class ValidationConfig:
+    """Explicit plausibility policy for a particular source snapshot."""
+
+    snapshot_year: int
+    minimum_year: int = 1800
+    minimum_height_ft: float = 0
+    maximum_height_ft: float = 2_000
+    minimum_stories: int = 0
+    maximum_stories: int = 200
+    minimum_latitude: float = 32
+    maximum_latitude: float = 42.1
+    minimum_longitude: float = -124.5
+    maximum_longitude: float = -114
+    minimum_hazus_pct: float = 0
+    maximum_hazus_pct: float = 100
+    hazus_2010_fault_marker: float = -50
+
+
+DEFAULT_VALIDATION_CONFIG = ValidationConfig(snapshot_year=2026)
 
 
 class ValidationError(ValueError):
@@ -39,31 +61,63 @@ def validate_keys(rows: list[dict[str, Scalar]], source_name: str) -> None:
         )
 
 
-def validate_value_ranges(rows: list[dict[str, Scalar]], source_name: str) -> None:
+def validate_value_ranges(
+    rows: list[dict[str, Scalar]],
+    source_name: str,
+    config: ValidationConfig = DEFAULT_VALIDATION_CONFIG,
+) -> None:
     for index, row in enumerate(rows, start=2):
         _check_identifier(row, index, source_name)
         _check_finite_numbers(row, index, source_name)
-        _check_range(row, "height_ft", minimum=0, maximum=2_000, index=index, source=source_name)
-        _check_range(row, "stories", minimum=0, maximum=200, index=index, source=source_name)
+        _check_range(
+            row,
+            "height_ft",
+            minimum=config.minimum_height_ft,
+            maximum=config.maximum_height_ft,
+            index=index,
+            source=source_name,
+        )
+        _check_range(
+            row,
+            "stories",
+            minimum=config.minimum_stories,
+            maximum=config.maximum_stories,
+            index=index,
+            source=source_name,
+        )
         _check_range(
             row,
             "building_code_year",
-            minimum=1800,
-            maximum=SNAPSHOT_YEAR,
+            minimum=config.minimum_year,
+            maximum=config.snapshot_year,
             index=index,
             source=source_name,
         )
         _check_range(
             row,
             "year_completed",
-            minimum=1800,
-            maximum=SNAPSHOT_YEAR,
+            minimum=config.minimum_year,
+            maximum=config.snapshot_year,
             index=index,
             source=source_name,
         )
-        _check_range(row, "latitude", minimum=32, maximum=42.1, index=index, source=source_name)
-        _check_range(row, "longitude", minimum=-124.5, maximum=-114, index=index, source=source_name)
-        _check_hazus(row, index, source_name)
+        _check_range(
+            row,
+            "latitude",
+            minimum=config.minimum_latitude,
+            maximum=config.maximum_latitude,
+            index=index,
+            source=source_name,
+        )
+        _check_range(
+            row,
+            "longitude",
+            minimum=config.minimum_longitude,
+            maximum=config.maximum_longitude,
+            index=index,
+            source=source_name,
+        )
+        _check_hazus(row, index, source_name, config)
         if row.get("record_count") != 1:
             raise ValidationError(f"{source_name} row {index}: record_count must equal 1")
 
@@ -108,10 +162,26 @@ def _check_range(
         )
 
 
-def _check_hazus(row: Mapping[str, Scalar], index: int, source: str) -> None:
+def _check_hazus(
+    row: Mapping[str, Scalar],
+    index: int,
+    source: str,
+    config: ValidationConfig,
+) -> None:
     value_2007 = row.get("hazus_2007_pct")
-    if value_2007 is not None and not 0 <= value_2007 <= 100:  # type: ignore[operator]
+    if (
+        value_2007 is not None
+        and not config.minimum_hazus_pct
+        <= value_2007
+        <= config.maximum_hazus_pct  # type: ignore[operator]
+    ):
         raise ValidationError(f"{source} row {index}: invalid 2007 Hazus percentage")
     value_2010 = row.get("hazus_2010_pct")
-    if value_2010 is not None and value_2010 != -50 and not 0 <= value_2010 <= 100:  # type: ignore[operator]
+    if (
+        value_2010 is not None
+        and value_2010 != config.hazus_2010_fault_marker
+        and not config.minimum_hazus_pct
+        <= value_2010
+        <= config.maximum_hazus_pct  # type: ignore[operator]
+    ):
         raise ValidationError(f"{source} row {index}: invalid 2010 Hazus percentage")

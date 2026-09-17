@@ -5,8 +5,12 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from .cleaning import normalize_columns, parse_values
-from .cleaning.values import Scalar
+from .cleaning import (
+    add_dataset_review_flags,
+    add_review_flags,
+    normalize_columns,
+    parse_values,
+)
 from .ingestion import read_source_csv
 from .integration import JoinAudit, join_sources
 from .schema import (
@@ -15,6 +19,7 @@ from .schema import (
     OUTPUT_COLUMNS,
     SEISMIC_COLUMNS,
     SEISMIC_SCHEMA,
+    Scalar,
     SourceSchema,
     default_interim_dir,
     default_processed_dir,
@@ -22,6 +27,8 @@ from .schema import (
 )
 from .storage import read_parquet, write_parquet
 from .validation import (
+    DEFAULT_VALIDATION_CONFIG,
+    ValidationConfig,
     summarize_review_flags,
     validate_keys,
     validate_required_columns,
@@ -39,19 +46,32 @@ class PipelineResult:
     join_audit: JoinAudit
 
 
-def load_clean_validate(path: Path, schema: SourceSchema) -> list[dict[str, Scalar]]:
+def load_clean_validate(
+    path: Path,
+    schema: SourceSchema,
+    validation_config: ValidationConfig = DEFAULT_VALIDATION_CONFIG,
+) -> list[dict[str, Scalar]]:
     rows = read_source_csv(path, schema)
     normalized = normalize_columns(rows, schema)
-    parsed = parse_values(normalized)
+    parsed = parse_values(normalized, schema.name)
     validate_required_columns(parsed, schema)
     validate_keys(parsed, schema.name)
-    validate_value_ranges(parsed, schema.name)
+    validate_value_ranges(parsed, schema.name, validation_config)
     return parsed
 
 
-def run_pipeline(raw_dir: Path, interim_dir: Path, processed_dir: Path) -> PipelineResult:
-    building = load_clean_validate(raw_dir / BUILDING_SCHEMA.filename, BUILDING_SCHEMA)
-    seismic = load_clean_validate(raw_dir / SEISMIC_SCHEMA.filename, SEISMIC_SCHEMA)
+def run_pipeline(
+    raw_dir: Path,
+    interim_dir: Path,
+    processed_dir: Path,
+    validation_config: ValidationConfig = DEFAULT_VALIDATION_CONFIG,
+) -> PipelineResult:
+    building = load_clean_validate(
+        raw_dir / BUILDING_SCHEMA.filename, BUILDING_SCHEMA, validation_config
+    )
+    seismic = load_clean_validate(
+        raw_dir / SEISMIC_SCHEMA.filename, SEISMIC_SCHEMA, validation_config
+    )
 
     building_interim = interim_dir / "hospital_buildings_clean.parquet"
     seismic_interim = interim_dir / "seismic_ratings_clean.parquet"
@@ -61,8 +81,10 @@ def run_pipeline(raw_dir: Path, interim_dir: Path, processed_dir: Path) -> Pipel
     building = read_parquet(building_interim, BUILDING_COLUMNS)
     seismic = read_parquet(seismic_interim, SEISMIC_COLUMNS)
     integrated, audit = join_sources(building, seismic)
+    integrated = [add_review_flags(row) for row in integrated]
+    integrated = add_dataset_review_flags(integrated)
     validate_keys(integrated, "integrated")
-    validate_value_ranges(integrated, "integrated")
+    validate_value_ranges(integrated, "integrated", validation_config)
     _validate_output_schema(integrated)
 
     output_parquet = processed_dir / "hospital_buildings_integrated.parquet"

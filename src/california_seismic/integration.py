@@ -2,9 +2,7 @@
 
 from dataclasses import asdict, dataclass
 
-from .cleaning.quality import add_dataset_review_flags, add_review_flags
-from .cleaning.values import Scalar
-from .schema import JOIN_KEYS, SEISMIC_ONLY_COLUMNS, SHARED_COLUMNS
+from .schema import JOIN_KEYS, SEISMIC_ONLY_COLUMNS, SHARED_COLUMNS, Scalar
 from .validation import ValidationError, validate_keys
 
 
@@ -48,7 +46,7 @@ def join_sources(
                 mismatches.append((key, column, building[column], seismic[column]))
         combined = dict(building)
         combined.update({column: seismic[column] for column in SEISMIC_ONLY_COLUMNS})
-        integrated.append(add_review_flags(combined))
+        integrated.append(combined)
 
     audit = JoinAudit(
         building_rows=len(building_rows),
@@ -69,7 +67,7 @@ def join_sources(
             f"building_only={len(building_only)}, seismic_only={len(seismic_only)}, "
             f"building_sample={building_only[:5]}, seismic_sample={seismic_only[:5]}"
         )
-    return add_dataset_review_flags(integrated), audit
+    return integrated, audit
 
 
 def _key(row: dict[str, Scalar]) -> Key:

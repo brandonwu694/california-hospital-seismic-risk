@@ -1,6 +1,12 @@
 import unittest
+from dataclasses import replace
 
-from california_seismic.validation import ValidationError, validate_keys, validate_value_ranges
+from california_seismic.validation import (
+    DEFAULT_VALIDATION_CONFIG,
+    ValidationError,
+    validate_keys,
+    validate_value_ranges,
+)
 
 
 def valid_row() -> dict[str, object]:
@@ -39,6 +45,15 @@ class ValidationTests(unittest.TestCase):
         row = valid_row()
         row["hazus_2010_pct"] = -50.0
         validate_value_ranges([row], "fixture")
+
+    def test_snapshot_year_is_configurable(self) -> None:
+        row = valid_row()
+        row["year_completed"] = 2027
+        with self.assertRaises(ValidationError):
+            validate_value_ranges([row], "fixture")
+
+        config = replace(DEFAULT_VALIDATION_CONFIG, snapshot_year=2027)
+        validate_value_ranges([row], "fixture", config)
 
 
 if __name__ == "__main__":

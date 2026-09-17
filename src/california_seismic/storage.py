@@ -6,8 +6,7 @@ from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from .cleaning.values import Scalar
-from .schema import FLOAT_COLUMNS, INTEGER_COLUMNS, JOIN_KEYS, TEXT_COLUMNS
+from .schema import FLOAT_COLUMNS, INTEGER_COLUMNS, JOIN_KEYS, TEXT_COLUMNS, Scalar
 
 
 def parquet_schema(columns: Sequence[str]) -> pa.Schema:

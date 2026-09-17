@@ -53,7 +53,9 @@ class PipelineTests(unittest.TestCase):
                 "hazus_2010_pct": "",
                 "npc_rating": "4",
             }
-            self._write_source(raw / BUILDING_SCHEMA.filename, BUILDING_SCHEMA.column_map, building)
+            self._write_source(
+                raw / BUILDING_SCHEMA.filename, BUILDING_SCHEMA.column_map, building
+            )
             self._write_source(raw / SEISMIC_SCHEMA.filename, SEISMIC_SCHEMA.column_map, seismic)
 
             result = run_pipeline(raw, interim, processed)

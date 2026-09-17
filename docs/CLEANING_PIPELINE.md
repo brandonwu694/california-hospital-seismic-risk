@@ -11,7 +11,7 @@ The Phase 1 pipeline reads both HCAI source CSVs, cleans and validates each sour
 | `cleaning/columns.py` | Header normalization, including both source SPC headers mapping to `spc_rating`. |
 | `cleaning/values.py` | Nullable numeric parsing while retaining text markers such as `N/A`. |
 | `cleaning/quality.py` | Nonfatal review flags without modifying source values. |
-| `validation.py` | Required fields, string identifiers, unique keys, finite numbers, geographic bounds, and plausible value ranges. |
+| `validation.py` | Structural invariants and explicit, configurable plausibility bounds. |
 | `integration.py` | Composite-key join, unmatched-key audit, and shared-field comparison. |
 | `storage.py` | Explicit Arrow schemas and compressed Parquet input/output. |
 | `pipeline.py` | Pipeline orchestration and validation-report output. |
@@ -41,6 +41,8 @@ Use `--raw-dir`, `--interim-dir`, or `--processed-dir` to override those directo
 ## Validation behavior
 
 The pipeline stops on schema changes, blank or duplicate composite keys, malformed IDs, nonfinite numeric values, values outside broad physical/date/geographic bounds, incomplete joins, or disagreements among shared source fields. For example, a completion year of 3025 or a height of -123 feet fails validation.
+
+Identifier presence, identifier format, and key uniqueness are source invariants. Physical, geographic, Hazus, and year bounds are centralized in `ValidationConfig`. Its explicit `snapshot_year=2026` matches the current source snapshot and can be replaced when validating a later release; it does not change with the system date.
 
 Values that are questionable but not demonstrably wrong remain in the output with semicolon-delimited `review_flags`. Current flags cover zero height, zero stories, completion before building-code year, inconsistent city labels within a facility, unverified or non-applicable SPC labels, and records outside the exact in-service status.
 

@@ -2,28 +2,28 @@
 
 from collections import defaultdict
 
-from .values import Scalar
+from ..schema import Scalar
 
 
 def add_review_flags(row: dict[str, Scalar]) -> dict[str, Scalar]:
-    flags: list[str] = []
+    flags = _existing_flags(row)
 
     if row.get("height_ft") == 0:
-        flags.append("zero_height")
+        _append_once(flags, "zero_height")
     if row.get("stories") == 0:
-        flags.append("zero_stories")
+        _append_once(flags, "zero_stories")
 
     completed = row.get("year_completed")
     code_year = row.get("building_code_year")
     if isinstance(completed, int) and isinstance(code_year, int) and completed < code_year:
-        flags.append("completion_before_code_year")
+        _append_once(flags, "completion_before_code_year")
     if row.get("spc_rating") == "N/A":
-        flags.append("spc_not_applicable")
+        _append_once(flags, "spc_not_applicable")
     elif isinstance(row.get("spc_rating"), str) and row["spc_rating"].endswith("s"):
-        flags.append("spc_unverified")
+        _append_once(flags, "spc_unverified")
 
     if row.get("building_status") != "OSHPD 1-In Service":
-        flags.append("not_in_service")
+        _append_once(flags, "not_in_service")
 
     enriched = dict(row)
     enriched["review_flags"] = ";".join(flags)
@@ -48,9 +48,18 @@ def add_dataset_review_flags(
     for row in rows:
         enriched = dict(row)
         if row.get("facility_id") in inconsistent:
-            current = enriched.get("review_flags")
-            flags = current.split(";") if isinstance(current, str) and current else []
-            flags.append("facility_city_inconsistent")
+            flags = _existing_flags(enriched)
+            _append_once(flags, "facility_city_inconsistent")
             enriched["review_flags"] = ";".join(flags)
         output.append(enriched)
     return output
+
+
+def _existing_flags(row: dict[str, Scalar]) -> list[str]:
+    current = row.get("review_flags")
+    return current.split(";") if isinstance(current, str) and current else []
+
+
+def _append_once(flags: list[str], flag: str) -> None:
+    if flag not in flags:
+        flags.append(flag)
