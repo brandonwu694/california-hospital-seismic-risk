@@ -1,6 +1,6 @@
 import unittest
 
-from california_seismic.integration import join_sources
+from california_seismic.integration import JoinValidationError, join_sources
 from california_seismic.schema import SEISMIC_ONLY_COLUMNS, SHARED_COLUMNS
 from california_seismic.validation import ValidationError
 
@@ -53,8 +53,14 @@ class IntegrationTests(unittest.TestCase):
         for column in SEISMIC_ONLY_COLUMNS:
             seismic[column] = None
 
-        with self.assertRaisesRegex(ValidationError, "Shared fields disagree"):
+        with self.assertRaisesRegex(ValidationError, "shared fields disagree") as raised:
             join_sources([building], [seismic])
+        self.assertIsInstance(raised.exception, JoinValidationError)
+        diagnostics = raised.exception.diagnostics
+        self.assertEqual(diagnostics["audit"]["shared_field_mismatches"], 1)
+        self.assertEqual(
+            diagnostics["shared_field_mismatches"][0]["field"], "city"
+        )
 
     def test_rejects_unmatched_keys(self) -> None:
         building = shared_row()
@@ -63,8 +69,10 @@ class IntegrationTests(unittest.TestCase):
         for column in SEISMIC_ONLY_COLUMNS:
             seismic[column] = None
 
-        with self.assertRaisesRegex(ValidationError, "Join is incomplete"):
+        with self.assertRaisesRegex(ValidationError, "join is incomplete") as raised:
             join_sources([building], [seismic])
+        self.assertEqual(len(raised.exception.diagnostics["building_only_keys"]), 1)
+        self.assertEqual(len(raised.exception.diagnostics["seismic_only_keys"]), 1)
 
 
 if __name__ == "__main__":

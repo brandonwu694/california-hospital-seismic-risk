@@ -8,6 +8,7 @@ from typing import TypeAlias
 Scalar: TypeAlias = str | int | float | None
 ENCODING = "cp1252"
 JOIN_KEYS = ("facility_id", "building_id")
+SCHEMA_VERSION = 1
 
 SHARED_COLUMNS = (
     "county_code",

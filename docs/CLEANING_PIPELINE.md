@@ -14,6 +14,7 @@ The Phase 1 pipeline reads both HCAI source CSVs, cleans and validates each sour
 | `validation.py` | Structural invariants and explicit, configurable plausibility bounds. |
 | `integration.py` | Composite-key join, unmatched-key audit, and shared-field comparison. |
 | `storage.py` | Explicit Arrow schemas and compressed Parquet input/output. |
+| `artifacts.py` | File fingerprints, manifest verification, and atomic publication helpers. |
 | `pipeline.py` | Pipeline orchestration and validation-report output. |
 
 ## Run
@@ -35,6 +36,7 @@ The pipeline reads those interim files back before joining and writes:
 
 - `data/processed/hospital_buildings_integrated.parquet`
 - `data/processed/hospital_buildings_validation.json`
+- `data/processed/hospital_buildings_manifest.json`
 
 Use `--raw-dir`, `--interim-dir`, or `--processed-dir` to override those directories.
 
@@ -48,6 +50,12 @@ Values that are questionable but not demonstrably wrong remain in the output wit
 
 The current snapshot produces 4,690 integrated records from a complete one-to-one join. No records are filtered. The JSON report records join coverage, blank counts, and review-flag counts.
 
+## Publication and reproducibility
+
+The pipeline writes all artifacts into a temporary staging directory and validates the persisted Parquet sources before publishing them. It replaces individual artifacts atomically and publishes the completion manifest last. The manifest is removed before replacements begin, so its presence identifies a complete set whose hashes can be checked against the current files.
+
+The validation report records the run ID, UTC timestamp, package and schema versions, a hash of the package source, Python and PyArrow versions, validation configuration, and SHA-256 fingerprints of both raw inputs. The completion manifest also fingerprints every published artifact using paths relative to `data/processed/`. Failed runs preserve the previous completed run when failure occurs before publication and write a uniquely named structured failure report, including complete join diagnostics when applicable.
+
 ## Tests
 
 Run the test suite with:
@@ -56,4 +64,4 @@ Run the test suite with:
 python3 -m unittest discover -s tests -v
 ```
 
-Tests cover SPC header reconciliation, string IDs, missing markers, review flags, impossible value rejection, duplicate keys, shared-field conflicts, unmatched records, and an end-to-end Parquet pipeline.
+Tests cover SPC header reconciliation, string IDs, malformed records, missing markers, review flags, validation policy, shared-field conflicts, unmatched records, staged-publication failures, manifest integrity, and the end-to-end Parquet pipeline.

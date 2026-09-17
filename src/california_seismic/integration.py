@@ -22,6 +22,14 @@ class JoinAudit:
         return asdict(self)
 
 
+class JoinValidationError(ValidationError):
+    """Raised with structured diagnostics when source integration fails."""
+
+    def __init__(self, message: str, diagnostics: dict[str, object]) -> None:
+        super().__init__(message)
+        self.diagnostics = diagnostics
+
+
 def join_sources(
     building_rows: list[dict[str, Scalar]],
     seismic_rows: list[dict[str, Scalar]],
@@ -57,16 +65,31 @@ def join_sources(
         shared_field_mismatches=len(mismatches),
     )
 
+    problems: list[str] = []
     if mismatches:
-        raise ValidationError(
-            f"Shared fields disagree for {len(mismatches)} values; sample={mismatches[:5]}"
-        )
+        problems.append(f"shared fields disagree for {len(mismatches)} values")
     if require_complete_match and (building_only or seismic_only):
-        raise ValidationError(
-            "Join is incomplete; "
-            f"building_only={len(building_only)}, seismic_only={len(seismic_only)}, "
-            f"building_sample={building_only[:5]}, seismic_sample={seismic_only[:5]}"
+        problems.append(
+            f"join is incomplete: building_only={len(building_only)}, "
+            f"seismic_only={len(seismic_only)}"
         )
+    if problems:
+        diagnostics: dict[str, object] = {
+            "audit": audit.as_dict(),
+            "building_only_keys": [_key_record(key) for key in building_only],
+            "seismic_only_keys": [_key_record(key) for key in seismic_only],
+            "shared_field_mismatches": [
+                {
+                    "facility_id": key[0],
+                    "building_id": key[1],
+                    "field": field,
+                    "building_value": building_value,
+                    "seismic_value": seismic_value,
+                }
+                for key, field, building_value, seismic_value in mismatches
+            ],
+        }
+        raise JoinValidationError("; ".join(problems), diagnostics)
     return integrated, audit
 
 
@@ -75,3 +98,7 @@ def _key(row: dict[str, Scalar]) -> Key:
     if not all(isinstance(value, str) for value in values):
         raise ValidationError(f"Join key contains a non-string value: {values}")
     return values  # type: ignore[return-value]
+
+
+def _key_record(key: Key) -> dict[str, str]:
+    return {"facility_id": key[0], "building_id": key[1]}

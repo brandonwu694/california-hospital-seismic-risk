@@ -53,4 +53,4 @@ build-integrated-data
 python3 -m unittest discover -s tests -v
 ```
 
-The pipeline preserves all source records, writes independently cleaned Parquet tables to `data/interim/`, writes the integrated Parquet dataset and validation report to `data/processed/`, and stops when required invariants fail. See the [cleaning pipeline guide](docs/CLEANING_PIPELINE.md) for details.
+The pipeline preserves all source records, writes independently cleaned Parquet tables to `data/interim/`, and publishes the integrated dataset, validation report, and hashed completion manifest to `data/processed/`. See the [cleaning pipeline guide](docs/CLEANING_PIPELINE.md) for validation and failure behavior.
